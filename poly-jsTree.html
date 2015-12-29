@@ -33,6 +33,11 @@
                             value: "default",
                             observer: "_themeChanged"
                         },
+                        largeThemeVariant:{
+                            type:Boolean,
+                            value:false,
+                            observer:"_themeVariantChanged"
+                        },
                     fitToParent:
                         {
                             type: Boolean,
@@ -76,7 +81,7 @@
                 //this.$.treeContainer.clientHeight = this.$.treeContainer.parentElement.clientHeight;                
                 this.$.treeContainer.className += " scroller";
 
-                if (this.theme.toLowerCase() === "dark")
+                if (this.theme.toLowerCase() === "default-dark")
                     $(".scroller").mCustomScrollbar({ theme: "dark", autoExpandScrollbar: true });
                 else
                     $(".scroller").mCustomScrollbar({ autoExpandScrollbar: true });
@@ -86,13 +91,28 @@
                 if (this.theme.toLowerCase() === "no theme") {
                     return;
                 }
-                if (this.theme.toLowerCase() === "dark") {
+                if (this.theme.toLowerCase() === "default-dark" ) {
                     $('head').append('<link rel="stylesheet" href="'+location +'../../jstree/dist/themes/default-dark/style.css" type="text/css" />');
                 }
                 else {
                     $('head').append('<link rel="stylesheet" href="'+location +'../../jstree/dist/themes/default/style.css" type="text/css" />');
                 }
+                
             },
+            _themeVariantChanged: function () {
+                if ( $("#jsTree").jstree(true))
+                {
+                if (this.largeThemeVariant)
+                  $("#jsTree").jstree(true).set_theme_variant("large");
+                  else
+                   $("#jsTree").jstree(true).set_theme_variant(false);
+                }
+                else
+                {
+                     if (this.largeThemeVariant)
+                        $.jstree.defaults.core.themes.variant = "large";
+                }
+                },
             _createTree: function () {
                 var _self = this;
                 $.jstree.destroy();
@@ -117,6 +137,11 @@
                         'core':
                             {
                                 'data': this.treeData,
+                                'themes':  {
+                            "name": _self.theme,
+                            "dots": true,
+                            "icons": true
+                        }
                             }
                     });
             },
