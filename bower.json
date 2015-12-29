@@ -1,0 +1,32 @@
+{
+  "name": "poly-JsTree",
+  "version": "1.0.0",
+  "authors": [
+    "Edward Kruger <eduard@urbanautomation.co.za>"
+  ],
+  "description": "An element wrapper around JSTree.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "seed"
+    
+  ],
+  "main": "poly-jsTree.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/<USERNAME>/seed-element/",
+  "ignore": [
+    "/.*",
+    "/test/",
+    "/demo/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+     "jstree": "3.2.1",
+    "malihu-custom-scrollbar-plugin": "3.1.3"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
+  }
+}
