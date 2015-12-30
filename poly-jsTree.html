@@ -8,17 +8,21 @@
 
 <dom-module id="poly-JsTree">
     <style>
-
-
     </style>
     <template>
         <iron-ajax auto
                    url="{{treeDataUrl}}"
                    handle-as="json"
-                   on-response="_handleResponse"
+                   on-response="_handleResponse" loading="{{isLoading}}"
                    debounce-duration="300"></iron-ajax>
-        <div id="treeContainer">
+        <div hidden$="{{!isLoading}}">
+            <content>
 
+            </content>
+        </div>
+
+        <div id="treeContainer" >
+            
             <div id="jsTree"></div>
         </div>
     </template>
@@ -27,6 +31,10 @@
             is: "poly-JsTree",
             properties:
                 {
+                    _executingPath:
+                        {
+                            type: String
+                        },
                     theme:
                         {
                             type: String,
@@ -58,6 +66,11 @@
                             type: Object,
                             readOnly: true,
                         },
+                    isLoading:
+                        {
+                            type: Boolean,
+                            value: false,
+                        },
                     selectedNodes:
                         {
                             type: Array,
@@ -70,7 +83,7 @@
             _fitToParentSize: function () {
                 this.$.jsTree.style.width = "100%";
                 this.$.jsTree.style.height = "100%";
-                
+
                  this.$.treeContainer.style.height = this.$.treeContainer.parentElement.parentElement.style.height;
                   this.$.treeContainer.style.width = this.$.treeContainer.parentElement.parentElement.style.width;
             },
@@ -78,26 +91,26 @@
                 //$('head').append('<link rel="stylesheet" href="./bower_components/nanoscroller/bin/css/nanoscroller.css" type="text/css" />');
 
                 this.$.treeContainer.parentElement.parentElement.style.overflow = "hidden";
-                //this.$.treeContainer.clientHeight = this.$.treeContainer.parentElement.clientHeight;                
+                //this.$.treeContainer.clientHeight = this.$.treeContainer.parentElement.clientHeight;
                 this.$.treeContainer.className += " scroller";
 
-                if (this.theme.toLowerCase() === "default-dark")
+                if (this.theme.toLowerCase() !== "default-dark")
                     $(".scroller").mCustomScrollbar({ theme: "dark", autoExpandScrollbar: true });
                 else
                     $(".scroller").mCustomScrollbar({ autoExpandScrollbar: true });
             },
             _themeChanged: function () {
-                var location = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')+1)
+                var location = this._executingPath;
                 if (this.theme.toLowerCase() === "no theme") {
                     return;
                 }
                 if (this.theme.toLowerCase() === "default-dark" ) {
-                    $('head').append('<link rel="stylesheet" href="'+location +'../../jstree/dist/themes/default-dark/style.css" type="text/css" />');
+                    $('head').append('<link rel="stylesheet" href="' + location + '../jstree/dist/themes/default-dark/style.css" type="text/css" />');
                 }
                 else {
-                    $('head').append('<link rel="stylesheet" href="'+location +'../../jstree/dist/themes/default/style.css" type="text/css" />');
+                    $('head').append('<link rel="stylesheet" href="' + location + '../jstree/dist/themes/default/style.css" type="text/css" />');
                 }
-                
+
             },
             _themeVariantChanged: function () {
                 if ( $("#jsTree").jstree(true))
@@ -120,10 +133,10 @@
                     .on("ready.jstree", function () {
                         if (_self.fitToParent ===true)
                             _self._fitToParentSize();
-                       
+
                         if (_self.scrolls === true)
                             _self._attachScrollbars();
-                            
+
                     }).on('changed.jstree', function (e, data) {
                         _self.selectedNodes = [];
                         var i,j =0;
@@ -131,7 +144,7 @@
                             _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
                             console.log("selected nodes: " + _self.selectedNodes[i].text);
                         }
-                        
+
                     })
                     .jstree({
                         'core':
@@ -148,7 +161,11 @@
             ready: function () {
 
             },
-            attached: function () {
+            created: function () {
+                var imports = document.querySelectorAll('link[rel="import"]');
+                for (var i = 0; i < imports.length; i++)
+                    if (imports[i].href.toLowerCase().indexOf("poly-jstree") > 0)
+                        this._executingPath = imports[i].href.toLowerCase().substring(0, imports[i].href.lastIndexOf('/') + 1)
             }
 
         });
