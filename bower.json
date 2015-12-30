@@ -9,12 +9,12 @@
     "web-component",
     "web-components",
     "polymer",
-    "seed"
+    "jsTree"
     
   ],
   "main": "poly-jsTree.html",
   "license": "http://polymer.github.io/LICENSE.txt",
-  "homepage": "https://github.com/<USERNAME>/seed-element/",
+  "homepage": "https://github.com/spookenator/poly-jstree/",
   "ignore": [
     "/.*",
     "/test/",
@@ -23,7 +23,9 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
      "jstree": "3.2.1",
-    "malihu-custom-scrollbar-plugin": "3.1.3"
+    "malihu-custom-scrollbar-plugin": "3.1.3",
+    "fit.js": "*",
+    "jQuery": "2.1.4"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
