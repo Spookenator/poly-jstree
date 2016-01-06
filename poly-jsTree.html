@@ -21,8 +21,8 @@
             </content>
         </div>
 
-        <div id="treeContainer" >
-            
+        <div id="treeContainer">
+
             <div id="jsTree"></div>
         </div>
     </template>
@@ -41,11 +41,11 @@
                             value: "default",
                             observer: "_themeChanged"
                         },
-                        largeThemeVariant:{
-                            type:Boolean,
-                            value:false,
-                            observer:"_themeVariantChanged"
-                        },
+                    largeThemeVariant: {
+                        type: Boolean,
+                        value: false,
+                        observer: "_themeVariantChanged"
+                    },
                     fitToParent:
                         {
                             type: Boolean,
@@ -74,8 +74,51 @@
                     selectedNodes:
                         {
                             type: Array,
-                        }
+                        },
+                    allowsCrud:
+                    {
+                        type: Boolean,
+                        value: true,
+                    },
+                    notifyServerOfCrud:
+                    {
+                        type: Boolean
+                    },
+                    createNewNodeServerUrl:
+                    {
+                        type: String
+                    },
+                    deleteNodeServerUrl:
+                    {
+                        type: String
+                    }
                 },
+
+
+            createNewChildNode: function (e) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode[0], "new node", "first");
+
+                    if (this.notifyServerOfCrud)
+                        this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
+                }
+            },
+            deleteSelectedNode: function (e) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    $('#jsTree').jstree(true).delete_node(currentNode);
+
+                    if (this.notifyServerOfCrud)
+                        this.$.xhr.send({ url: this.deleteNodeServerUrl, params: { id: currentNode.Id, nodes: currentNode } });
+                }
+            },
+            expandAllNodes: function (e) {
+                $('#jsTree').jstree('open_all');
+            },
+            closeAllNodes: function (e) {
+                $('#jsTree').jstree('close_all');
+            },
             _handleResponse: function (event, request) {
                 this._setTreeData(request.response);
                 this._createTree();
@@ -84,8 +127,8 @@
                 this.$.jsTree.style.width = "100%";
                 this.$.jsTree.style.height = "100%";
 
-                 this.$.treeContainer.style.height = this.$.treeContainer.parentElement.parentElement.style.height;
-                  this.$.treeContainer.style.width = this.$.treeContainer.parentElement.parentElement.style.width;
+                this.$.treeContainer.style.height = this.$.treeContainer.parentElement.parentElement.style.height;
+                this.$.treeContainer.style.width = this.$.treeContainer.parentElement.parentElement.style.width;
             },
             _attachScrollbars: function () {
                 //$('head').append('<link rel="stylesheet" href="./bower_components/nanoscroller/bin/css/nanoscroller.css" type="text/css" />');
@@ -104,7 +147,7 @@
                 if (this.theme.toLowerCase() === "no theme") {
                     return;
                 }
-                if (this.theme.toLowerCase() === "default-dark" ) {
+                if (this.theme.toLowerCase() === "default-dark") {
                     $('head').append('<link rel="stylesheet" href="' + location + '../jstree/dist/themes/default-dark/style.css" type="text/css" />');
                 }
                 else {
@@ -113,25 +156,23 @@
 
             },
             _themeVariantChanged: function () {
-                if ( $("#jsTree").jstree(true))
-                {
-                if (this.largeThemeVariant)
-                  $("#jsTree").jstree(true).set_theme_variant("large");
-                  else
-                   $("#jsTree").jstree(true).set_theme_variant(false);
+                if ($("#jsTree").jstree(true)) {
+                    if (this.largeThemeVariant)
+                        $("#jsTree").jstree(true).set_theme_variant("large");
+                    else
+                        $("#jsTree").jstree(true).set_theme_variant(false);
                 }
-                else
-                {
-                     if (this.largeThemeVariant)
+                else {
+                    if (this.largeThemeVariant)
                         $.jstree.defaults.core.themes.variant = "large";
                 }
-                },
+            },
             _createTree: function () {
                 var _self = this;
                 $.jstree.destroy();
                 $("#jsTree")
                     .on("ready.jstree", function () {
-                        if (_self.fitToParent ===true)
+                        if (_self.fitToParent === true)
                             _self._fitToParentSize();
 
                         if (_self.scrolls === true)
@@ -139,7 +180,7 @@
 
                     }).on('changed.jstree', function (e, data) {
                         _self.selectedNodes = [];
-                        var i,j =0;
+                        var i, j = 0;
                         for (i = 0, j = data.selected.length; i < j; i++) {
                             _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
                             console.log("selected nodes: " + _self.selectedNodes[i].text);
@@ -150,16 +191,21 @@
                         'core':
                             {
                                 'data': this.treeData,
-                                'themes':  {
-                            "name": _self.theme,
-                            "dots": true,
-                            "icons": true
-                        }
+                                'themes': {
+                                    "name": _self.theme,
+                                    "dots": true,
+                                    "icons": true
+                                },
+                                'check_callback' :this.allowsCrud,
                             }
                     });
             },
             ready: function () {
-
+                
+                document.addEventListener("jstree.createNode", this.createNewChildNode);
+                document.addEventListener("jstree.deleteNode", this.deleteSelectedNode);
+                document.addEventListener("jstree.expandAll", this.expandAllNodes);
+                document.addEventListener("jstree.closeAll", this.closeAllNodes);
             },
             created: function () {
                 var imports = document.querySelectorAll('link[rel="import"]');
