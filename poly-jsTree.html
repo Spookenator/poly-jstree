@@ -101,6 +101,9 @@
                 if (currentNode != null || currentNode.length > 0) {
                     var nodeid = $('#jsTree').jstree(true).create_node(currentNode[0], "new node", "first");
 
+                    $('#jsTree').jstree(true).deselect_node(currentNode);
+                    $('#jsTree').jstree(true).select_node(nodeid);
+
                     if (this.notifyServerOfCrud)
                         this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
                 }
@@ -108,6 +111,7 @@
             deleteSelectedNode: function (e) {
                 var currentNode = $('#jsTree').jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
+                    debugger;
                     $('#jsTree').jstree(true).delete_node(currentNode);
 
                     if (this.notifyServerOfCrud)
@@ -188,9 +192,10 @@
                             _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
                             console.log("selected nodes: " + _self.selectedNodes[i].text);
                         }
-                        _self.fire('SelectedNodeChanged', { data: nodes });
+                        _self.fire('SelectedNodeChanged', { data: _self.selectedNodes });
                     })
                     .jstree({
+                        "plugins": ["core", "themes", "json_data", "ui", "types"],
                         'core':
                             {
                                 'data': this.treeData,
