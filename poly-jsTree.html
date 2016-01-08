@@ -185,7 +185,7 @@
                             _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
                             console.log("selected nodes: " + _self.selectedNodes[i].text);
                         }
-
+                            _self.fire('SelectedNodeChanged', {data:nodes});
                     })
                     .jstree({
                         'core':
