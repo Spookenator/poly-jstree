@@ -212,10 +212,11 @@
                         _self.expandAllNodes(e);
                     }, 500);
                 });
-                document.addEventListener("jstree.closeAll",   
-                  _self.async(function () {
-                    _self.closeAllNodes(e);
-                }, 500));
+                document.addEventListener("jstree.collapseAll",function (e) {
+                    _self.async(function () {
+                        _self.closeAllNodes(e);
+                    }, 500);
+                });
             },
             created: function () {
                 var imports = document.querySelectorAll('link[rel="import"]');
