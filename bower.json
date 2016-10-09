@@ -24,7 +24,7 @@
     "polymer": "Polymer/polymer#latest",
      "jstree": "latest",
     "malihu-custom-scrollbar-plugin": "latest",
-    "jQuery": "latest"
+    "jQuery": "*"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#latest",
