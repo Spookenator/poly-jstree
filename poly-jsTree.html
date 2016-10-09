@@ -1,8 +1,8 @@
-<link rel="import" href="../jquery/dist/jquery.js">
+<!--<link rel="import" href="../jquery/dist/jquery.js">-->
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../polymer/polymer.html">
 
-<script src="../jstree/dist/jstree.js"></script>
+<!--<script src="../jstree/dist/jstree.js"></script>-->
 <link href="../malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
 <script src="../malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.js"></script>
 
@@ -70,6 +70,7 @@
                         {
                             type: Boolean,
                             value: false,
+                            notify: true,
                         },
                     selectedNodes:
                         {
@@ -91,17 +92,64 @@
                     deleteNodeServerUrl:
                     {
                         type: String
-                    }
+                    },
+                    selectLastCreatedNode: { type: Boolean },
+                    plugins:
+                    {
+                        type: Array,
+                        value: ["core", "themes", "json_data", "ui"],
+                        notify: true,
+                    },
+                    pluginsConfig:
+                   {
+                       type: Object
+                   }
+
                 },
-
-
-            createNewChildNode: function (e) {
+            UpdateNode: function (nodeid) {
+                $('#jsTree').jstree(true).refresh_node(nodeid);
+            },
+            createNewChildNodeEvent: function (e) {
                 var currentNode = $('#jsTree').jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode[0], "new node", "first");
+                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode[0], { text: "new node", id: 9999 }, "first");
 
-                    if (this.notifyServerOfCrud)
-                        this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
+                    if (this.selectLastCreatedNode) {
+                        $('#jsTree').jstree(true).deselect_node(currentNode);
+                        $('#jsTree').jstree(true).select_node(nodeid);
+                    }
+                    //if (this.notifyServerOfCrud)
+                    //    this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
+                }
+            },
+            CreateNewChildNode: function (node) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode[0], { text: node.text, id: node.id }, "first");
+
+                    if (this.selectLastCreatedNode) {
+
+                        $('#jsTree').jstree(true).deselect_node(currentNode, true);
+                        $('#jsTree').jstree(true).select_node(nodeid);
+                    }
+                    //if (this.notifyServerOfCrud)
+                    //    this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
+                }
+            },
+            CreateNewNode: function (node, parentid) {
+                console.log(node);
+                console.log(parentid);
+                var currentNode = $("#jsTree").jstree(true).get_node(parentid);
+                console.log(currentNode);
+                if (currentNode != null || currentNode.length > 0) {
+                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode, { text: node.text, id: node.id }, "first");
+
+
+                    if (this.selectLastCreatedNode) {
+                        $('#jsTree').jstree(true).select_node(nodeid);
+                    }
+                    //if (this.notifyServerOfCrud)
+                    //    this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
                 }
             },
             deleteSelectedNode: function (e) {
@@ -109,15 +157,60 @@
                 if (currentNode != null || currentNode.length > 0) {
                     $('#jsTree').jstree(true).delete_node(currentNode);
 
-                    if (this.notifyServerOfCrud)
-                        this.$.xhr.send({ url: this.deleteNodeServerUrl, params: { id: currentNode.Id, nodes: currentNode } });
+                    //if (this.notifyServerOfCrud)
+                    //    this.$.xhr.send({ url: this.deleteNodeServerUrl, params: { id: currentNode.Id, nodes: currentNode } });
                 }
+            },
+            deleteNodeById: function (id) {
+                $('#jsTree').jstree(true).delete_node($("#jsTree").jstree(true).get_node(id));
+            },
+            cutSelectedNode: function (e) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    if ($('#jsTree').jstree('can_paste')) {
+                        var currentBuffer = $('#jsTree').jstree('get_buffer');
+                        $('#jsTree').jstree('enable_node', currentBuffer.node);
+                    }
+                    $('#jsTree').jstree('disable_node', currentNode);
+                    $('#jsTree').jstree('cut', currentNode);
+                }
+            },
+            pasteSelectedNode: function (e) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    if ($('#jsTree').jstree('can_paste')) {
+                        var currentBuffer = $('#jsTree').jstree('get_buffer');
+                        $('#jsTree').jstree('enable_node', currentBuffer.node);
+                        $('#jsTree').jstree('paste', currentNode);
+                    }
+                }
+            },
+            deselectAllNodes: function (e) {
+                $('#tree').jstree("deselect_all");
             },
             expandAllNodes: function (e) {
                 $('#jsTree').jstree('open_all');
+
             },
+
             closeAllNodes: function (e) {
                 $('#jsTree').jstree('close_all');
+            },
+            expandSelectedNode: function (e) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    this.expandNode(currentNode[0]);
+                }
+            },
+            expandNode: function (obj) {
+                $('#jsTree').jstree('open_node', obj);
+            },
+
+            closeSelectedNode: function (e) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    $('#jsTree').jstree('close_node', currentNode);
+                }
             },
             _handleResponse: function (event, request) {
                 this._setTreeData(request.response);
@@ -142,6 +235,34 @@
                 else
                     $(".scroller").mCustomScrollbar({ autoExpandScrollbar: true });
             },
+            selectNodes: function (selectedItems) {
+
+                if (selectedItems != null || selectedItems.length > 0) {
+                    $('#jsTree').jstree('deselect_all', true);
+                    selectedItems.forEach(this._selectNode)
+
+                    $('.scroller').mCustomScrollbar('scrollTo', $("#" + selectedItems[selectedItems.length - 1]), {
+                        scrollInertia: 2000
+                    });
+                }
+            },
+            _selectNode: function (element, index, array) {
+                var lastElement = array.length - 1;
+                var shouldSuppressEvent = (index == lastElement) ? false : true;
+                $('#jsTree').jstree('select_node', element, shouldSuppressEvent);
+            },
+            updateSelectedNode: function (e) {
+                var currentNode = $('#jsTree').jstree('get_selected');
+                if (currentNode != null || currentNode.length > 0) {
+                    $('#jsTree').jstree('refresh_node', currentNode);
+                }
+            },
+            updateType: function (nodeId, typeId) {
+                $('#jsTree').jstree('set_type', nodeId, typeId);
+            },
+            updateText: function (nodeId, newText) {
+                $('#jsTree').jstree('set_text', nodeId, newText);
+            },
             _themeChanged: function () {
                 var location = this._executingPath;
                 if (this.theme.toLowerCase() === "no theme") {
@@ -149,6 +270,10 @@
                 }
                 if (this.theme.toLowerCase() === "default-dark") {
                     $('head').append('<link rel="stylesheet" href="' + location + '../jstree/dist/themes/default-dark/style.css" type="text/css" />');
+                }
+                else if (this.theme.toLowerCase() === "proton") {
+                    $('head').append('<link rel="stylesheet" href="' + location + '../jstree-bootstrap-theme/dist/themes/proton/style.css" type="text/css" />');
+                    $("#treeContainer").css("background", "#333131").css("color", "white");
                 }
                 else {
                     $('head').append('<link rel="stylesheet" href="' + location + '../jstree/dist/themes/default/style.css" type="text/css" />');
@@ -169,43 +294,108 @@
             },
             _createTree: function () {
                 var _self = this;
-                $.jstree.destroy();
-                $("#jsTree")
-                    .on("ready.jstree", function () {
-                        if (_self.fitToParent === true)
-                            _self._fitToParentSize();
-
-                        if (_self.scrolls === true)
-                            _self._attachScrollbars();
-
-                    }).on('changed.jstree', function (e, data) {
-                        _self.selectedNodes = [];
-                        var i, j = 0;
-                        for (i = 0, j = data.selected.length; i < j; i++) {
-                            _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
-                            console.log("selected nodes: " + _self.selectedNodes[i].text);
+                var type = null;
+                if (this.pluginsConfig != null && this.pluginsConfig.types != null)
+                    type =_self.pluginsConfig.types;
+        
+                $("#jsTree").jstree({
+                    "plugins": _self.plugins.concat(["core", "themes", "json_data", "ui"]),
+                    'core':
+                        {
+                            'data': this.treeData,
+                            'themes': {
+                                "name": _self.theme,
+                                "dots": true,
+                                "icons": true,
+                                "responsive": true
+                            },
+                            'check_callback': this._check_callback,
                         }
+                });
+                if (type)
+                    $.jstree.defaults.types = type;
 
-                    })
-                    .jstree({
-                        'core':
-                            {
-                                'data': this.treeData,
-                                'themes': {
-                                    "name": _self.theme,
-                                    "dots": true,
-                                    "icons": true
-                                },
-                                'check_callback' :this.allowsCrud,
-                            }
-                    });
+
+                $("#jsTree").on("ready.jstree", function () {
+                    if (_self.fitToParent === true)
+                        _self._fitToParentSize();
+
+                    if (_self.scrolls === true)
+                        _self._attachScrollbars();
+
+                }).on('changed.jstree', function (e, data) {
+                    _self.selectedNodes = [];
+
+                    var i, j = 0;
+                    for (i = 0, j = data.selected.length; i < j; i++) {
+                        _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
+                        console.log("selected nodes: " + _self.selectedNodes[i].text);
+                    }
+                    _self.fire('SelectedNodeChanged', { data: _self.selectedNodes });
+                });
+            },
+            _check_callback: function (operation, node, node_parent, node_position, more) {
+                console.log(operation);
+                if (operation === "move_node" || (operation === "copy_node")) { //copy_node is called when a node is being droped across trees
+                    //$(node).jstree(true).settings.dnd.always_copy = false;
+                    var parent = null;
+
+                    if (more.is_multi) {
+                        //if dropping from another tree instance
+
+                        //$(node).jstree(true).settings.dnd.always_copy = true;
+
+                        return false;
+                    }
+
+                    else { //when moving and dropping a node inside the same tree
+                        //if (options.acceptLocalDrop) {
+                        //    //if (node_parent.id == "712967697")
+                        //    //debugger;
+                        //    parent = _this.jstree('get_node', node_parent.id);
+                        //}
+                        //else {
+                        //    return false;
+                        //}
+                        //debugger;
+                        return true;
+                    }
+                }
+                else
+                    return true;
             },
             ready: function () {
                 
-                document.addEventListener("jstree.createNode", this.createNewChildNode);
+                var _self = this;
+                //document.addEventListener("jstree.selectNode", this.selectNode, false);
+                document.addEventListener("jstree.updateSelectedNode", this.updateSelectedNode);
+                document.addEventListener("jstree.createNode", this.createNewChildNodeEvent);
                 document.addEventListener("jstree.deleteNode", this.deleteSelectedNode);
-                document.addEventListener("jstree.expandAll", this.expandAllNodes);
-                document.addEventListener("jstree.closeAll", this.closeAllNodes);
+                document.addEventListener("jstree.cutSelectedNode", this.cutSelectedNode);
+                document.addEventListener("jstree.pasteSelectedNode", this.pasteSelectedNode);
+
+                document.addEventListener("jstree.expandAll", function (e) {
+                    _self.async(function () {
+                        _self.expandAllNodes(e);
+                    }, 500);
+                });
+                document.addEventListener("jstree.collapseAll", function (e) {
+                    _self.async(function () {
+                        _self.closeAllNodes(e);
+                    }, 500);
+                });
+                document.addEventListener("jstree.collapseSelectedNode", function (e) {
+                    _self.async(function () {
+                        _self.closeSelectedNode(e);
+                    }, 200);
+                });
+                document.addEventListener("jstree.expandSelectedNode", function (e) {
+                    _self.async(function () {
+                        _self.expandSelectedNode(e);
+                    }, 200);
+                });
+                console.log("Js-Tree listening for events");
+
             },
             created: function () {
                 var imports = document.querySelectorAll('link[rel="import"]');
