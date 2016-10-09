@@ -202,14 +202,15 @@
                     this.expandNode(currentNode[0]);
                 }
             },
+            
             expandNode: function (obj) {
-                $('#jsTree').jstree('open_node', obj);
+                $('#jsTree').jstree('open_all', obj);
             },
 
             closeSelectedNode: function (e) {
                 var currentNode = $('#jsTree').jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    $('#jsTree').jstree('close_node', currentNode);
+                    $('#jsTree').jstree('close_all', currentNode);
                 }
             },
             _handleResponse: function (event, request) {
