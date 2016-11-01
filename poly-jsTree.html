@@ -22,7 +22,6 @@
         </div>
 
         <div id="treeContainer">
-
             <div id="jsTree"></div>
         </div>
     </template>
@@ -107,30 +106,30 @@
 
                 },
             UpdateNode: function (nodeid) {
-                $('#jsTree').jstree(true).refresh_node(nodeid);
+                $(this.$$('#jsTree')).jstree(true).refresh_node(nodeid);
             },
             createNewChildNodeEvent: function (e) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode[0], { text: "new node", id: 9999 }, "first");
+                    var nodeid = $(this.$$('#jsTree')).jstree(true).create_node(currentNode[0], { text: "new node", id: 9999 }, "first");
 
                     if (this.selectLastCreatedNode) {
-                        $('#jsTree').jstree(true).deselect_node(currentNode);
-                        $('#jsTree').jstree(true).select_node(nodeid);
+                        $(this.$$('#jsTree')).jstree(true).deselect_node(currentNode);
+                        $(this.$$('#jsTree')).jstree(true).select_node(nodeid);
                     }
                     //if (this.notifyServerOfCrud)
                     //    this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
                 }
             },
             CreateNewChildNode: function (node) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode[0], { text: node.text, id: node.id }, "first");
+                    var nodeid = $(this.$$('#jsTree')).jstree(true).create_node(currentNode[0], { text: node.text, id: node.id }, "first");
 
                     if (this.selectLastCreatedNode) {
 
-                        $('#jsTree').jstree(true).deselect_node(currentNode, true);
-                        $('#jsTree').jstree(true).select_node(nodeid);
+                        $(this.$$('#jsTree')).jstree(true).deselect_node(currentNode, true);
+                        $(this.$$('#jsTree')).jstree(true).select_node(nodeid);
                     }
                     //if (this.notifyServerOfCrud)
                     //    this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
@@ -139,49 +138,49 @@
             CreateNewNode: function (node, parentid) {
                 console.log(node);
                 console.log(parentid);
-                var currentNode = $("#jsTree").jstree(true).get_node(parentid);
+                var currentNode = $(this.$$('#jsTree')).jstree(true).get_node(parentid);
                 console.log(currentNode);
                 if (currentNode != null || currentNode.length > 0) {
-                    var nodeid = $('#jsTree').jstree(true).create_node(currentNode, { text: node.text, id: node.id }, "first");
+                    var nodeid = $(this.$$('#jsTree')).jstree(true).create_node(currentNode, { text: node.text, id: node.id }, "first");
 
 
                     if (this.selectLastCreatedNode) {
-                        $('#jsTree').jstree(true).select_node(nodeid);
+                        $(this.$$('#jsTree')).jstree(true).select_node(nodeid);
                     }
                     //if (this.notifyServerOfCrud)
                     //    this.$.xhr.send({ url: this.createNewNodeServerUrl, params: { id: nodeid } });
                 }
             },
             deleteSelectedNode: function (e) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    $('#jsTree').jstree(true).delete_node(currentNode);
+                    $(this.$$('#jsTree')).jstree(true).delete_node(currentNode);
 
                     //if (this.notifyServerOfCrud)
                     //    this.$.xhr.send({ url: this.deleteNodeServerUrl, params: { id: currentNode.Id, nodes: currentNode } });
                 }
             },
             deleteNodeById: function (id) {
-                $('#jsTree').jstree(true).delete_node($("#jsTree").jstree(true).get_node(id));
+                $(this.$$('#jsTree')).jstree(true).delete_node($(this.$$('#jsTree')).jstree(true).get_node(id));
             },
             cutSelectedNode: function (e) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    if ($('#jsTree').jstree('can_paste')) {
-                        var currentBuffer = $('#jsTree').jstree('get_buffer');
-                        $('#jsTree').jstree('enable_node', currentBuffer.node);
+                    if ($(this.$$('#jsTree')).jstree('can_paste')) {
+                        var currentBuffer = $(this.$$('#jsTree')).jstree('get_buffer');
+                        $(this.$$('#jsTree')).jstree('enable_node', currentBuffer.node);
                     }
-                    $('#jsTree').jstree('disable_node', currentNode);
-                    $('#jsTree').jstree('cut', currentNode);
+                    $(this.$$('#jsTree')).jstree('disable_node', currentNode);
+                    $(this.$$('#jsTree')).jstree('cut', currentNode);
                 }
             },
             pasteSelectedNode: function (e) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    if ($('#jsTree').jstree('can_paste')) {
-                        var currentBuffer = $('#jsTree').jstree('get_buffer');
-                        $('#jsTree').jstree('enable_node', currentBuffer.node);
-                        $('#jsTree').jstree('paste', currentNode);
+                    if ($(this.$$('#jsTree')).jstree('can_paste')) {
+                        var currentBuffer = $(this.$$('#jsTree')).jstree('get_buffer');
+                        $(this.$$('#jsTree')).jstree('enable_node', currentBuffer.node);
+                        $(this.$$('#jsTree')).jstree('paste', currentNode);
                     }
                 }
             },
@@ -189,27 +188,27 @@
                 $('#tree').jstree("deselect_all");
             },
             expandAllNodes: function (e) {
-                $('#jsTree').jstree('open_all');
+                $(this.$$('#jsTree')).jstree('open_all');
 
             },
 
             closeAllNodes: function (e) {
-                $('#jsTree').jstree('close_all');
+                $(this.$$('#jsTree')).jstree('close_all');
             },
             expandSelectedNode: function (e) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
                     this.expandNode(currentNode[0]);
                 }
             },
             expandNode: function (obj) {
-                $('#jsTree').jstree('open_node', obj);
+                $(this.$$('#jsTree')).jstree('open_node', obj);
             },
 
             closeSelectedNode: function (e) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    $('#jsTree').jstree('close_node', currentNode);
+                    $(this.$$('#jsTree')).jstree('close_node', currentNode);
                 }
             },
             _handleResponse: function (event, request) {
@@ -238,7 +237,7 @@
             selectNodes: function (selectedItems) {
 
                 if (selectedItems != null || selectedItems.length > 0) {
-                    $('#jsTree').jstree('deselect_all', true);
+                    $(this.$$('#jsTree')).jstree('deselect_all', true);
                     selectedItems.forEach(this._selectNode)
 
                     $('.scroller').mCustomScrollbar('scrollTo', $("#" + selectedItems[selectedItems.length - 1]), {
@@ -249,19 +248,19 @@
             _selectNode: function (element, index, array) {
                 var lastElement = array.length - 1;
                 var shouldSuppressEvent = (index == lastElement) ? false : true;
-                $('#jsTree').jstree('select_node', element, shouldSuppressEvent);
+                $(this.$$('#jsTree')).jstree('select_node', element, shouldSuppressEvent);
             },
             updateSelectedNode: function (e) {
-                var currentNode = $('#jsTree').jstree('get_selected');
+                var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    $('#jsTree').jstree('refresh_node', currentNode);
+                    $(this.$$('#jsTree')).jstree('refresh_node', currentNode);
                 }
             },
             updateType: function (nodeId, typeId) {
-                $('#jsTree').jstree('set_type', nodeId, typeId);
+                $(this.$$('#jsTree')).jstree('set_type', nodeId, typeId);
             },
             updateText: function (nodeId, newText) {
-                $('#jsTree').jstree('set_text', nodeId, newText);
+                $(this.$$('#jsTree')).jstree('set_text', nodeId, newText);
             },
             _themeChanged: function () {
                 var location = this._executingPath;
@@ -281,11 +280,11 @@
 
             },
             _themeVariantChanged: function () {
-                if ($("#jsTree").jstree(true)) {
+                if ($(this.$$('#jsTree')).jstree(true)) {
                     if (this.largeThemeVariant)
-                        $("#jsTree").jstree(true).set_theme_variant("large");
+                        $(this.$$('#jsTree')).jstree(true).set_theme_variant("large");
                     else
-                        $("#jsTree").jstree(true).set_theme_variant(false);
+                        $(this.$$('#jsTree')).jstree(true).set_theme_variant(false);
                 }
                 else {
                     if (this.largeThemeVariant)
@@ -298,7 +297,7 @@
                 if (this.pluginsConfig != null && this.pluginsConfig.types != null)
                     type =_self.pluginsConfig.types;
         
-                $("#jsTree").jstree({
+                $(this.$$('#jsTree')).jstree({
                     "plugins": _self.plugins.concat(["core", "themes", "json_data", "ui"]),
                     'core':
                         {
@@ -316,7 +315,7 @@
                     $.jstree.defaults.types = type;
 
 
-                $("#jsTree").on("ready.jstree", function () {
+                $(this.$$('#jsTree')).on("ready.jstree", function () {
                     if (_self.fitToParent === true)
                         _self._fitToParentSize();
 
