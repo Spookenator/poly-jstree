@@ -201,7 +201,6 @@
                     this.expandNode(currentNode[0]);
                 }
             },
-            
             expandNode: function (obj) {
                 $(this.$$('#jsTree')).jstree('open_node', obj);
             },
@@ -294,9 +293,7 @@
             },
             _createTree: function () {
                 var _self = this;
-                var type = null;
-                if (this.pluginsConfig != null && this.pluginsConfig.types != null)
-                    type =_self.pluginsConfig.types;
+                var type = this.pluginsConfig.types;
         
                 $(this.$$('#jsTree')).jstree({
                     "plugins": _self.plugins.concat(["core", "themes", "json_data", "ui"]),
@@ -310,11 +307,11 @@
                                 "responsive": true
                             },
                             'check_callback': this._check_callback,
-                        }
-                });
-                if (type)
-                    $.jstree.defaults.types = type;
+                        },
+                    'types': type
 
+                });
+               
 
                 $(this.$$('#jsTree')).on("ready.jstree", function () {
                     if (_self.fitToParent === true)
@@ -333,6 +330,8 @@
                     }
                     _self.fire('SelectedNodeChanged', { data: _self.selectedNodes });
                 });
+
+
             },
             _check_callback: function (operation, node, node_parent, node_position, more) {
                 console.log(operation);
