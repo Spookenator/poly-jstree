@@ -2,9 +2,10 @@
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../polymer/polymer.html">
 
-<!--<script src="../jstree/dist/jstree.js"></script>-->
-<link href="../malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
-<script src="../malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.js"></script>
+<script src="../jstree/dist/jstree.js"></script>
+
+<!--<link href="../malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet" />-->
+<!--<script src="../malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.js"></script>-->
 
 <dom-module id="poly-JsTree">
     <style>
@@ -63,13 +64,13 @@
                     treeData:
                         {
                             type: Object,
-                            readOnly: true,
+                            readOnly: true
                         },
                     isLoading:
                         {
                             type: Boolean,
                             value: false,
-                            notify: true,
+                            notify: true
                         },
                     selectedNodes:
                         {
@@ -93,18 +94,20 @@
                         type: String
                     },
                     selectLastCreatedNode: { type: Boolean },
+                    eventId: String,
                     plugins:
                     {
                         type: Array,
                         value: ["core", "themes", "json_data", "ui"],
-                        notify: true,
+                        notify: true
                     },
                     pluginsConfig:
                    {
                        type: Object
                    }
 
-                },
+            },
+
             UpdateNode: function (nodeid) {
                 $(this.$$('#jsTree')).jstree(true).refresh_node(nodeid);
             },
@@ -195,24 +198,31 @@
             closeAllNodes: function (e) {
                 $(this.$$('#jsTree')).jstree('close_all');
             },
-            expandSelectedNode: function (e) {
+            expandSelectedNode: function (e, includeChildren) {
                 var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    this.expandNode(currentNode[0]);
+                    this.expandNode(currentNode[0], includeChildren);
                 }
             },
-            expandNode: function (obj) {
-                $(this.$$('#jsTree')).jstree('open_node', obj);
+            expandNode: function (obj, expandChildren) {
+                var action = 'open_node';
+                if (expandChildren)
+                    action = 'open_all';
+                $(this.$$('#jsTree')).jstree(action, obj);
             },
 
-            closeSelectedNode: function (e) {
+            closeSelectedNode: function (e, includingChildren) {
+                var action = 'close_node';
+                if (includingChildren)
+                    action = 'close_all';
                 var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
                 if (currentNode != null || currentNode.length > 0) {
-                    $(this.$$('#jsTree')).jstree('close_node', currentNode);
+                    $(this.$$('#jsTree')).jstree(action, currentNode);
                 }
             },
             _handleResponse: function (event, request) {
                 this._setTreeData(request.response);
+
                 this._createTree();
             },
             _fitToParentSize: function () {
@@ -248,7 +258,8 @@
             _selectNode: function (element, index, array) {
                 var lastElement = array.length - 1;
                 var shouldSuppressEvent = (index == lastElement) ? false : true;
-                $(this.$$('#jsTree')).jstree('select_node', element, shouldSuppressEvent);
+                var node = document.querySelector('#jsTree');
+                $(node).jstree('select_node', element, shouldSuppressEvent);
             },
             updateSelectedNode: function (e) {
                 var currentNode = $(this.$$('#jsTree')).jstree('get_selected');
@@ -294,12 +305,13 @@
             _createTree: function () {
                 var _self = this;
                 var type = this.pluginsConfig.types;
-        
+                var state = this.pluginsConfig.state;
+
                 $(this.$$('#jsTree')).jstree({
                     "plugins": _self.plugins.concat(["core", "themes", "json_data", "ui"]),
                     'core':
                         {
-                            'data': this.treeData,
+                            //'data': this.treeData,
                             'themes': {
                                 "name": _self.theme,
                                 "dots": true,
@@ -308,29 +320,37 @@
                             },
                             'check_callback': this._check_callback,
                         },
-                    'types': type
+                    'types': type,
+                    'state': state
 
                 });
-               
+
+                $(this.$$('#jsTree')).jstree(true).settings.core.data = this.treeData;
+                $(this.$$('#jsTree')).jstree(true).refresh();
 
                 $(this.$$('#jsTree')).on("ready.jstree", function () {
                     if (_self.fitToParent === true)
                         _self._fitToParentSize();
 
-                    if (_self.scrolls === true)
+                    if (_self.scrolls === true) {
                         _self._attachScrollbars();
-
-                }).on('changed.jstree', function (e, data) {
-                    _self.selectedNodes = [];
-
-                    var i, j = 0;
-                    for (i = 0, j = data.selected.length; i < j; i++) {
-                        _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
-                        console.log("selected nodes: " + _self.selectedNodes[i].text);
                     }
-                    _self.fire('SelectedNodeChanged', { data: _self.selectedNodes });
-                });
 
+                });
+                $(this.$$('#jsTree')).on('changed.jstree', function (e, data) {
+                    _self.selectedNodes = [];
+                    if (data.action === "select_node") {
+                        var i, j = 0;
+                        for (i = 0, j = data.selected.length; i < j; i++) {
+                            _self.selectedNodes.push(data.instance.get_node(data.selected[i]));
+                            console.log("selected nodes: " + _self.selectedNodes[i].text);
+                        }
+                        if (_self.eventId != null && _self.eventId != "")
+                            _self.fire(_self.eventId + '_SelectedNodeChanged', { data: _self.selectedNodes });
+                        else
+                            _self.fire('SelectedNodeChanged', { data: _self.selectedNodes });
+                    }
+                });
 
             },
             _check_callback: function (operation, node, node_parent, node_position, more) {
@@ -350,13 +370,13 @@
                     else { //when moving and dropping a node inside the same tree
                         //if (options.acceptLocalDrop) {
                         //    //if (node_parent.id == "712967697")
-                        //    //debugger;
+                        //    //
                         //    parent = _this.jstree('get_node', node_parent.id);
                         //}
                         //else {
                         //    return false;
                         //}
-                        //debugger;
+                        //
                         return true;
                     }
                 }
@@ -364,7 +384,7 @@
                     return true;
             },
             ready: function () {
-                
+
                 var _self = this;
                 //document.addEventListener("jstree.selectNode", this.selectNode, false);
                 document.addEventListener("jstree.updateSelectedNode", this.updateSelectedNode);
@@ -388,9 +408,19 @@
                         _self.closeSelectedNode(e);
                     }, 200);
                 });
+                document.addEventListener("jstree.collapseSelectedNodeWithChildren", function (e) {
+                    _self.async(function () {
+                        _self.closeSelectedNode(e,true);
+                    }, 200);
+                });
                 document.addEventListener("jstree.expandSelectedNode", function (e) {
                     _self.async(function () {
                         _self.expandSelectedNode(e);
+                    }, 200);
+                });
+                document.addEventListener("jstree.expandSelectedNodeWithChildren", function (e) {
+                    _self.async(function () {
+                        _self.expandSelectedNode(e, true);
                     }, 200);
                 });
                 console.log("Js-Tree listening for events");
